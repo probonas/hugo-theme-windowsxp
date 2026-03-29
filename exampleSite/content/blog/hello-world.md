@@ -30,6 +30,10 @@ func main() {
 }
 ```
 
+## A familiar view
+
+{{< figure src="bliss.jpg" caption="Bliss — the iconic Windows XP wallpaper" >}}
+
 ## What's next?
 
 Explore the desktop, open some windows, and enjoy the nostalgia!

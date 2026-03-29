@@ -1,4 +1,4 @@
-baseURL = 'https://example.com/'
+baseURL = 'https://probonas.github.io/hugo-theme-windowsxp/'
 languageCode = 'en-us'
 title = 'My XP Website'
 theme = 'hugo-theme-windowsxp'
@@ -9,7 +9,7 @@ enableRobotsTXT = true
 name = 'John Doe'
 bio = 'A software developer from the Internet'
 description = 'Personal website of John Doe'
-avatar = '/icons/xp/Rover.png'
+avatar = 'icons/xp/Rover.png'
 favicon = 'favicon.ico'
 
 # Social links (optional)

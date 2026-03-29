@@ -1,5 +1,7 @@
 {{ define "main" }}
 
+{{- $sectionIconDefaults := dict "blog" "MyDocuments" "posts" "MyDocuments" "projects" "MyComputer" "about" "SystemProperties" -}}
+{{- $iconBase := "icons/xp/" | relURL -}}
 {{/* Home window configuration */}}
 {{- $hwURL := "/about/" -}}
 {{- $hwTitle := "About Me — System Properties" -}}
@@ -17,7 +19,7 @@
 <div class="xp-window" id="home-window" style="width:650px; height:80%;">
   <div class="window-titlebar">
     <div class="window-titlebar-icon">
-      <img src="/icons/xp/{{ $hwIcon }}.png" alt="" width="16" height="16">
+      <img src="{{ $iconBase }}{{ $hwIcon }}.png" alt="" width="16" height="16">
     </div>
     <span class="window-title">{{ $hwTitle }}</span>
     <div class="window-controls">
@@ -27,7 +29,7 @@
     </div>
   </div>
   <div class="window-content" style="padding:0; overflow:hidden; display:flex; flex-direction:column;">
-    <iframe id="home-iframe" src="{{ $hwURL | absURL }}" style="width:100%; flex:1; border:none;"></iframe>
+    <iframe id="home-iframe" src="{{ .RelPermalink }}" style="width:100%; flex:1; border:none;"></iframe>
   </div>
 </div>
 {{ end }}
@@ -41,7 +43,7 @@
       </div>
       <div class="wm2003-today-owner">
         {{ with site.Params.avatar }}
-        <img class="wm2003-avatar" src="{{ . }}" alt="{{ site.Params.name }}">
+        <img class="wm2003-avatar" src="{{ . | relURL }}" alt="{{ site.Params.name }}">
         {{ end }}
         <div>
           <div class="wm2003-owner-name">{{ site.Params.name }}</div>
@@ -52,19 +54,19 @@
     <div class="wm2003-today-items">
       {{ range site.Menus.main }}
       <a href="{{ .URL }}" class="wm2003-today-item">
-        <img src="/icons/xp/{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="16" height="16">
+        <img src="{{ $iconBase }}{{ .Params.icon | default (index $sectionIconDefaults .Identifier) | default "FolderClosed" }}.png" alt="" width="16" height="16">
         <span>{{ .Name }}</span>
       </a>
       {{ end }}
       {{ with site.Params.resumeURL }}
-      <a href="{{ . | absURL }}" class="wm2003-today-item" target="_blank">
-        <img src="/icons/xp/GenericDocument.png" alt="" width="16" height="16">
+      <a href="{{ . | relURL }}" class="wm2003-today-item" target="_blank">
+        <img src="{{ $iconBase }}GenericDocument.png" alt="" width="16" height="16">
         <span>Resume (PDF)</span>
       </a>
       {{ end }}
       {{ with site.Params.github }}
       <a href="https://github.com/{{ . }}" class="wm2003-today-item" target="_blank" rel="noopener">
-        <img src="/icons/xp/InternetExplorer6.png" alt="" width="16" height="16">
+        <img src="{{ $iconBase }}InternetExplorer6.png" alt="" width="16" height="16">
         <span>GitHub</span>
       </a>
       {{ end }}

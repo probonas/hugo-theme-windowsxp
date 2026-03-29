@@ -4,6 +4,10 @@ A Hugo theme that recreates the **Windows XP Luna Blue** desktop experience in t
 
 On mobile, it transforms into a **Windows Mobile 2003** Pocket PC interface.
 
+![Desktop](screenshots/desktop.png)
+
+<img src="screenshots/mobile.png" alt="Mobile" width="390">
+
 ## Features
 
 - **Full desktop simulation** — taskbar, start menu, system tray with clock
@@ -44,6 +48,8 @@ hugo mod get -u
 
 ### Minimal `hugo.toml`
 
+Icons and window titles are auto-detected from the menu identifier — no params required:
+
 ```toml
 baseURL = 'https://example.com/'
 title = 'My Website'
@@ -53,29 +59,30 @@ theme = 'hugo-theme-windowsxp'
 name = 'Your Name'
 bio = 'A short tagline'
 avatar = 'https://example.com/avatar.jpg'
-
 mainSections = ['blog']
-
-[menu]
 
 [[menu.main]]
 identifier = 'about'
 name = 'About'
 url = '/about/'
 weight = 10
-[menu.main.params]
-icon = 'UserAccounts'
-windowTitle = 'About Me'
 
 [[menu.main]]
 identifier = 'blog'
 name = 'Blog'
 url = '/blog/'
 weight = 20
-[menu.main.params]
-icon = 'MyDocuments'
-windowTitle = 'My Documents'
 
+[[menu.main]]
+identifier = 'projects'
+name = 'Projects'
+url = '/projects/'
+weight = 30
+```
+
+To customize icons or window titles, add params:
+
+```toml
 [[menu.main]]
 identifier = 'projects'
 name = 'Projects'
@@ -100,6 +107,7 @@ xpLayout = 'icons'
 | `params.resumeURL` | Resume PDF path (adds desktop icon) | — |
 | `params.mainSections` | Sections for blog-like content | `["blog", "posts"]` |
 | `params.favicon` | Favicon path | `favicon.ico` |
+| `params.appleTouchIcon` | Apple touch icon path | `apple-touch-icon.png` |
 
 ### XP-Specific Parameters
 
@@ -116,17 +124,31 @@ Each `menu.main` entry supports these params:
 
 | Parameter | Description | Default |
 |---|---|---|
-| `icon` | XP icon name (filename without `.png`) | `FolderClosed` |
+| `icon` | XP icon name (filename without `.png`) | Auto-detected by identifier (see below) |
 | `windowTitle` | Title shown in the XP window title bar | Menu name |
 | `xpLayout` | List page layout: `list` or `icons` | `list` |
 | `desktopIcon` | Show as desktop icon (`true`/`false`) | `true` |
 | `desktopLabel` | Custom label for the desktop icon | Menu name |
 
+### Default Icon Mapping
+
+When no `icon` param is set on a menu entry, the theme picks an icon based on the menu `identifier`:
+
+| Identifier | Default Icon |
+|---|---|
+| `about` | `SystemProperties` |
+| `blog` | `MyDocuments` |
+| `posts` | `MyDocuments` |
+| `projects` | `MyComputer` |
+| *(anything else)* | `FolderClosed` |
+
+You can override any of these by setting `icon` in your menu params.
+
 ### Available Icons
 
 The following icons are included in `static/icons/xp/`:
 
-`Back`, `Briefcase`, `CommandPrompt`, `ControlPanel`, `Desktop`, `Explorer`, `FolderClosed`, `FolderOpened`, `FolderView`, `Forward`, `GenericDocument`, `GenericTextDocument`, `Go`, `HelpandSupport`, `InternetExplorer6`, `InternetShortcut`, `LocalDisk`, `Logout`, `MyComputer`, `MyDocuments`, `NetworkConnections`, `Notepad`, `Programs`, `RecentDocuments`, `Run`, `Search`, `Shortcutoverlay`, `Shutdown`, `SystemProperties`, `TourXP`, `Up`, `UserAccounts`, `Volume`, `WindowsFlag`, `WindowsPictureandFaxViewer`
+`Back`, `Briefcase`, `CommandPrompt`, `ControlPanel`, `Desktop`, `Explorer`, `FolderClosed`, `FolderOpened`, `FolderView`, `Forward`, `GenericDocument`, `GenericTextDocument`, `Go`, `HelpandSupport`, `InternetExplorer6`, `InternetShortcut`, `LocalDisk`, `Logout`, `MyComputer`, `MyDocuments`, `NetworkConnections`, `Notepad`, `Programs`, `RecentDocuments`, `Rover`, `Run`, `Search`, `Shortcutoverlay`, `Shutdown`, `SystemProperties`, `TourXP`, `Up`, `UserAccounts`, `Volume`, `WindowsFlag`, `WindowsPictureandFaxViewer`
 
 ## Content Structure
 
@@ -179,6 +201,37 @@ windowTitle = 'My Papers'
 ```
 
 The section automatically gets a desktop icon, start menu entry, sidebar links, and an Explorer window.
+
+## Shortcodes
+
+### Figure
+
+Overrides Hugo's built-in `figure` shortcode with [hugo-easy-gallery](https://github.com/liwenyip/hugo-easy-gallery/) support. Backwards-compatible with the standard `figure` params.
+
+```markdown
+{{< figure src="/images/photo.jpg" caption="A nice photo" >}}
+```
+
+Supported parameters: `src`, `link`, `thumb`, `caption`, `title`, `attr`, `attrlink`, `alt`, `size`, `class`, `width`, `caption-position`, `caption-effect`.
+
+### Gallery
+
+Renders an image gallery grid from a directory or from nested `figure` shortcodes.
+
+```markdown
+{{< gallery dir="/images/vacation/" />}}
+```
+
+Or with individual figures:
+
+```markdown
+{{< gallery >}}
+  {{< figure src="/images/a.jpg" caption="First" >}}
+  {{< figure src="/images/b.jpg" caption="Second" >}}
+{{< /gallery >}}
+```
+
+Supported parameters: `dir`, `caption-position` (default `bottom`), `caption-effect` (default `slide`), `hover-effect` (default `zoom`), `hover-transition`, `thumb`.
 
 ## Customization
 

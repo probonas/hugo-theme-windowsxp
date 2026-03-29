@@ -8,6 +8,8 @@
 {{- $titleDefaults := dict "blog" "My Documents" "posts" "My Documents" "projects" "My Computer" -}}
 {{- $layoutDefaults := dict "projects" "icons" -}}
 
+{{- $iconBase := "icons/xp/" | relURL -}}
+{{- $homeURL := site.Home.RelPermalink -}}
 {{- $icon := index $iconDefaults $section | default "FolderClosed" -}}
 {{- $windowTitle := index $titleDefaults $section | default .Title -}}
 {{- $xpLayout := index $layoutDefaults $section | default "list" -}}
@@ -21,18 +23,18 @@
   {{- end -}}
 {{- end -}}
 
-<div class="xp-window" data-url="{{ .Permalink }}">
+<div class="xp-window" data-url="{{ .RelPermalink }}">
 
   <!-- Title Bar -->
   <div class="window-titlebar">
     <div class="window-titlebar-icon">
-      <img src="/icons/xp/{{ $icon }}.png" alt="" width="16" height="16">
+      <img src="{{ $iconBase }}{{ $icon }}.png" alt="" width="16" height="16">
     </div>
     <span class="window-title">{{ $windowTitle }}</span>
     <div class="window-controls">
       <button class="btn-minimize" title="Minimize">&#8722;</button>
       <button class="btn-maximize" title="Maximize">&#9723;</button>
-      <button class="btn-close" title="Close" data-href="/">&#10005;</button>
+      <button class="btn-close" title="Close" data-href="{{ $homeURL }}">&#10005;</button>
     </div>
   </div>
 
@@ -44,24 +46,24 @@
   <!-- Standard Buttons Toolbar -->
   <div class="window-nav-toolbar">
     <button class="nav-btn nav-btn-back" disabled title="Back">
-      <img src="/icons/xp/Back.png" alt="" width="22" height="22">
+      <img src="{{ $iconBase }}Back.png" alt="" width="22" height="22">
       <span class="nav-btn-label">Back</span>
       <span class="nav-btn-dropdown">&#9662;</span>
     </button>
     <button class="nav-btn" disabled title="Forward">
-      <img src="/icons/xp/Forward.png" alt="" width="22" height="22">
+      <img src="{{ $iconBase }}Forward.png" alt="" width="22" height="22">
       <span class="nav-btn-dropdown">&#9662;</span>
     </button>
     <button class="nav-btn" disabled title="Up">
-      <img src="/icons/xp/Up.png" alt="" width="22" height="22">
+      <img src="{{ $iconBase }}Up.png" alt="" width="22" height="22">
     </button>
     <span class="nav-toolbar-sep"></span>
     <button class="nav-btn" disabled title="Search">
-      <img src="/icons/xp/Search.png" alt="" width="18" height="18">
+      <img src="{{ $iconBase }}Search.png" alt="" width="18" height="18">
       <span class="nav-btn-label">Search</span>
     </button>
     <button class="nav-btn" disabled title="Folders">
-      <img src="/icons/xp/FolderView.png" alt="" width="18" height="18">
+      <img src="{{ $iconBase }}FolderView.png" alt="" width="18" height="18">
       <span class="nav-btn-label">Folders</span>
     </button>
     <span class="nav-toolbar-sep"></span>
@@ -76,13 +78,13 @@
     <span class="window-toolbar-label">Address</span>
     <div class="window-address-bar">
       <div class="window-address-icon">
-        <img src="/icons/xp/{{ $icon }}.png" alt="" width="14" height="14">
+        <img src="{{ $iconBase }}{{ $icon }}.png" alt="" width="14" height="14">
       </div>
-      <span class="window-address-text">{{ .Permalink }}</span>
+      <span class="window-address-text">{{ .RelPermalink }}</span>
       <span class="window-address-dropdown">&#9662;</span>
     </div>
     <button class="nav-btn-go" disabled title="Go">
-      <img src="/icons/xp/Go.png" alt="" width="18" height="18">
+      <img src="{{ $iconBase }}Go.png" alt="" width="18" height="18">
     </button>
   </div>
 
@@ -102,14 +104,14 @@
           </div>
           <div class="xp-sidebar-body">
             {{ with site.Params.resumeURL }}
-            <a href="{{ . | absURL }}" class="xp-sidebar-link" target="_blank">
-              <img src="/icons/xp/GenericDocument.png" alt="" width="16" height="16">
+            <a href="{{ . | relURL }}" class="xp-sidebar-link" target="_blank">
+              <img src="{{ $iconBase }}GenericDocument.png" alt="" width="16" height="16">
               View resume
             </a>
             {{ end }}
             {{ with site.Params.github }}
             <a href="https://github.com/{{ . }}" class="xp-sidebar-link" target="_blank" rel="noopener">
-              <img src="/icons/xp/InternetExplorer6.png" alt="" width="16" height="16">
+              <img src="{{ $iconBase }}InternetExplorer6.png" alt="" width="16" height="16">
               View GitHub profile
             </a>
             {{ end }}
@@ -127,13 +129,13 @@
             {{- $sectionUrl := printf "/%s" $section -}}
             {{ if ne $menuUrl $sectionUrl }}
             <a href="{{ .URL }}" class="xp-sidebar-link">
-              <img src="/icons/xp/{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="16" height="16">
+              <img src="{{ $iconBase }}{{ .Params.icon | default (index $iconDefaults .Identifier) | default "FolderClosed" }}.png" alt="" width="16" height="16">
               {{ .Params.windowTitle | default .Name }}
             </a>
             {{ end }}
             {{ end }}
-            <a href="/" class="xp-sidebar-link">
-              <img src="/icons/xp/Desktop.png" alt="" width="16" height="16">
+            <a href="{{ $homeURL }}" class="xp-sidebar-link">
+              <img src="{{ $iconBase }}Desktop.png" alt="" width="16" height="16">
               Desktop
             </a>
           </div>
@@ -159,8 +161,9 @@
         <div class="xp-icon-grid">
           {{ range $pages }}
           {{ if not .Params.draft }}
-          <a href="{{ if .Params.externalUrl }}{{ .Params.externalUrl }}{{ else }}{{ .Permalink }}{{ end }}" class="xp-lg-icon" title="{{ .Params.Summary }}"{{ if .Params.externalUrl }} target="_blank" rel="noopener"{{ end }}>
-            <div class="xp-lg-img"><img src="/icons/xp/LocalDisk.png" alt="" width="48" height="48"></div>
+          {{ $extUrl := .Params.externalUrl | default .Params.external_link }}
+          <a href="{{ $extUrl | default .RelPermalink }}" class="xp-lg-icon" title="{{ .Params.Summary }}"{{ if $extUrl }} target="_blank" rel="noopener"{{ end }}>
+            <div class="xp-lg-img"><img src="{{ $iconBase }}LocalDisk.png" alt="" width="48" height="48"></div>
             <span class="xp-lg-name">{{ .Title }}</span>
           </a>
           {{ end }}
@@ -183,8 +186,8 @@
           </div>
           <div class="xp-sidebar-body">
             {{ with site.Params.resumeURL }}
-            <a href="{{ . | absURL }}" class="xp-sidebar-link" target="_blank">
-              <img src="/icons/xp/GenericDocument.png" alt="" width="16" height="16">
+            <a href="{{ . | relURL }}" class="xp-sidebar-link" target="_blank">
+              <img src="{{ $iconBase }}GenericDocument.png" alt="" width="16" height="16">
               View resume
             </a>
             {{ end }}
@@ -202,13 +205,13 @@
             {{- $sectionUrl := printf "/%s" $section -}}
             {{ if ne $menuUrl $sectionUrl }}
             <a href="{{ .URL }}" class="xp-sidebar-link">
-              <img src="/icons/xp/{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="16" height="16">
+              <img src="{{ $iconBase }}{{ .Params.icon | default (index $iconDefaults .Identifier) | default "FolderClosed" }}.png" alt="" width="16" height="16">
               {{ .Params.windowTitle | default .Name }}
             </a>
             {{ end }}
             {{ end }}
-            <a href="/" class="xp-sidebar-link">
-              <img src="/icons/xp/Desktop.png" alt="" width="16" height="16">
+            <a href="{{ $homeURL }}" class="xp-sidebar-link">
+              <img src="{{ $iconBase }}Desktop.png" alt="" width="16" height="16">
               Desktop
             </a>
           </div>
@@ -238,9 +241,10 @@
           </div>
           {{ range $pages }}
           {{ if not .Params.draft }}
-          <a href="{{ if .Params.externalUrl }}{{ .Params.externalUrl }}{{ else }}{{ .Permalink }}{{ end }}" class="detail-list-row"{{ if .Params.externalUrl }} target="_blank" rel="noopener"{{ end }}>
+          {{ $extUrl := .Params.externalUrl | default .Params.external_link }}
+          <a href="{{ $extUrl | default .RelPermalink }}" class="detail-list-row"{{ if $extUrl }} target="_blank" rel="noopener"{{ end }}>
             <span class="file-name">
-              <span class="file-icon-small"><img src="/icons/xp/GenericTextDocument.png" alt="" width="16" height="16"></span>
+              <span class="file-icon-small"><img src="{{ $iconBase }}GenericTextDocument.png" alt="" width="16" height="16"></span>
               {{ .Title }}
               {{ with .Params.Summary }} — <em style="font-weight:normal;opacity:0.7">{{ . }}</em>{{ end }}
             </span>

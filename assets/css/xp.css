@@ -1472,7 +1472,7 @@ a.nav-btn {
   }
 
   /* ======= Homepage: WM2003 Today Screen ======= */
-  #about-window { display: none !important; }
+  #about-window, #home-window { display: none !important; }
   .mobile-today-screen {
     display: block;
   }
