@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="{{ or site.LanguageCode site.Language.Lang }}">
+  {{ partial "head.html" . }}
+  <body class="xp-desktop">
+
+    {{/* ===== Section icon lookup helpers ===== */}}
+    {{- $sectionIconDefaults := dict "blog" "MyDocuments" "posts" "MyDocuments" "projects" "MyComputer" "about" "SystemProperties" -}}
+    {{- $mainSections := site.Params.mainSections | default (slice "blog" "posts") -}}
+
+    <!-- Windows Mobile 2003 shell (mobile only) -->
+    <div class="wm-navbar">
+      <button class="wm-navbar-start" id="wm-start-btn" aria-label="Start">
+        <svg viewBox="0 0 22 22" width="14" height="14">
+          <rect x="1" y="1" width="9" height="9" rx="1" fill="#FF4020"/>
+          <rect x="12" y="1" width="9" height="9" rx="1" fill="#00AAEE"/>
+          <rect x="1" y="12" width="9" height="9" rx="1" fill="#44BB44"/>
+          <rect x="12" y="12" width="9" height="9" rx="1" fill="#FFB900"/>
+        </svg>
+      </button>
+      <span class="wm-navbar-title">{{ if .IsHome }}Today{{ else }}{{ .Title | default site.Title }}{{ end }}</span>
+      <div class="wm-navbar-tray">
+        <svg class="wm-tray-icon" viewBox="0 0 20 14" width="14" height="10">
+          <rect x="0" y="10" width="3" height="4" fill="#fff"/>
+          <rect x="5" y="7" width="3" height="7" fill="#fff"/>
+          <rect x="10" y="4" width="3" height="10" fill="#fff" opacity="0.4"/>
+          <rect x="15" y="0" width="3" height="14" fill="#fff" opacity="0.4"/>
+        </svg>
+        <svg class="wm-tray-icon" viewBox="0 0 24 12" width="18" height="9">
+          <rect x="0" y="0" width="20" height="12" rx="1.5" fill="none" stroke="#fff" stroke-width="1.5"/>
+          <rect x="20" y="3" width="3" height="6" rx="1" fill="#fff"/>
+          <rect x="2" y="2" width="12" height="8" rx="0.5" fill="#6C6"/>
+        </svg>
+        <span class="wm-tray-clock" id="wm-clock"></span>
+      </div>
+    </div>
+
+    <div class="wm-start-menu" id="wm-start-menu">
+      <a href="/" class="wm-menu-item">
+        <img src="/icons/xp/Desktop.png" alt="" width="20" height="20">
+        <span>Home</span>
+      </a>
+      {{ range site.Menus.main }}
+      <a href="{{ .URL }}" class="wm-menu-item">
+        <img src="/icons/xp/{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="20" height="20">
+        <span>{{ .Name }}</span>
+      </a>
+      {{ end }}
+      {{ if or site.Params.resumeURL site.Params.github site.Params.linkedin }}
+      <div class="wm-menu-sep"></div>
+      {{ end }}
+      {{ with site.Params.resumeURL }}
+      <a href="{{ . | absURL }}" class="wm-menu-item" target="_blank">
+        <img src="/icons/xp/GenericDocument.png" alt="" width="20" height="20">
+        <span>Resume</span>
+      </a>
+      {{ end }}
+      {{ with site.Params.github }}
+      <a href="https://github.com/{{ . }}" class="wm-menu-item" target="_blank" rel="noopener">
+        <img src="/icons/xp/InternetExplorer6.png" alt="" width="20" height="20">
+        <span>GitHub</span>
+      </a>
+      {{ end }}
+      {{ with site.Params.linkedin }}
+      <a href="https://linkedin.com/in/{{ . }}" class="wm-menu-item" target="_blank" rel="noopener">
+        <img src="/icons/xp/Briefcase.png" alt="" width="20" height="20">
+        <span>LinkedIn</span>
+      </a>
+      {{ end }}
+    </div>
+
+    <div class="wm-cmdbar">
+      <span class="wm-cmdbar-left">{{ if not .IsHome }}<a href="/" class="wm-cmd-link">Home</a>{{ end }}</span>
+      <span class="wm-cmdbar-right">
+        {{- if .IsHome -}}
+          {{- with index site.Menus.main 0 -}}
+          <a href="{{ .URL }}" class="wm-cmd-link">{{ .Name }}</a>
+          {{- end -}}
+        {{- end -}}
+      </span>
+    </div>
+
+    <div class="desktop-area">
+
+      <div class="desktop-icons">
+        {{ range site.Menus.main }}
+        {{ if ne (default true .Params.desktopIcon) false }}
+        <a href="{{ .URL }}" class="desktop-icon" data-open data-title="{{ .Params.windowTitle | default .Name }}">
+          <div class="icon-img"><img src="/icons/xp/{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="48" height="48"></div>
+          <span class="icon-label">{{ .Params.desktopLabel | default .Name }}</span>
+        </a>
+        {{ end }}
+        {{ end }}
+
+        {{ with site.Params.resumeURL }}
+        <a href="{{ . | absURL }}" class="desktop-icon" target="_blank">
+          <div class="icon-img"><img src="/icons/xp/GenericDocument.png" alt="" width="48" height="48"></div>
+          <span class="icon-label">My Resume</span>
+        </a>
+        {{ end }}
+      </div>
+
+      <a href="/" class="desktop-icon" id="reset-desktop-icon" style="position:absolute;top:8px;right:8px;z-index:2;display:none;">
+        <div class="icon-img"><img src="/icons/xp/CommandPrompt.png" alt="" width="48" height="48"></div>
+        <span class="icon-label">resetDesktop.exe</span>
+      </a>
+
+      {{- $scatteredPages := where site.RegularPages "Type" "in" $mainSections -}}
+      {{ range $i, $page := $scatteredPages }}
+      {{ if not $page.Params.draft }}
+      <a href="{{ $page.Permalink }}" class="desktop-icon desktop-file-scattered" data-open data-title="{{ $page.Title }}" data-seed="{{ $i }}">
+        <div class="icon-img"><img src="/icons/xp/Notepad.png" alt="" width="48" height="48"></div>
+        <span class="icon-label">{{ $page.Title | truncate 28 }}</span>
+      </a>
+      {{ end }}
+      {{ end }}
+
+      {{ block "main" . }}{{ end }}
+    </div>
+
+    <!-- Taskbar -->
+    <div class="xp-taskbar">
+      <button class="start-button" id="start-btn">
+        <img class="start-flag" src="/icons/xp/WindowsFlag.svg" alt="" width="20" height="20">
+        <span class="start-text">start</span>
+      </button>
+
+      <div class="taskbar-items">
+        {{ if .IsHome }}
+        {{- $hwIcon := "SystemProperties" -}}
+        {{- $hwTitle := "About Me" -}}
+        {{- with site.Params.xp -}}
+          {{- with .homeWindowIcon -}}{{- $hwIcon = . -}}{{- end -}}
+          {{- with .homeWindowTitle -}}{{- $hwTitle = . -}}{{- end -}}
+        {{- end -}}
+        <a class="taskbar-item active" href="#" id="home-window-taskbar-item">
+          <img class="taskbar-item-icon" src="/icons/xp/{{ $hwIcon }}.png" alt="" width="16" height="16">
+          <span class="taskbar-item-text">{{ $hwTitle }}</span>
+        </a>
+        {{ else }}
+        {{- $tbIcon := index $sectionIconDefaults .Section | default "Explorer" -}}
+        {{- range site.Menus.main -}}
+          {{- if eq .Identifier $.Section -}}
+            {{- with .Params.icon -}}{{- $tbIcon = . -}}{{- end -}}
+          {{- end -}}
+        {{- end -}}
+        <a class="taskbar-item active" href="{{ .Permalink }}">
+          <img class="taskbar-item-icon" src="/icons/xp/{{ $tbIcon }}.png" alt="" width="16" height="16">
+          <span class="taskbar-item-text">{{ .Title }}</span>
+        </a>
+        {{ end }}
+      </div>
+
+      <div class="system-tray">
+        <img class="tray-icon" src="/icons/xp/NetworkConnections.png" alt="Network" width="16" height="16" title="Local Area Connection">
+        <img class="tray-icon" src="/icons/xp/Volume.png" alt="Volume" width="16" height="16" title="Volume">
+        <span class="tray-clock" id="xp-clock"></span>
+      </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div class="start-menu" id="start-menu">
+      <div class="start-menu-header">
+        {{ with site.Params.avatar }}
+        <img class="start-menu-avatar" src="{{ . }}" alt="{{ site.Params.name }}">
+        {{ end }}
+        <span class="start-menu-username">{{ site.Params.name | default site.Title }}</span>
+      </div>
+      <div class="start-menu-body">
+        <div class="start-menu-left">
+          <a href="/" class="start-menu-item">
+            <span class="start-menu-item-icon"><img src="/icons/xp/Desktop.png" alt="" width="24" height="24"></span> Desktop
+          </a>
+          <div class="start-menu-divider"></div>
+          {{ range site.Menus.main }}
+          <a href="{{ .URL }}" class="start-menu-item" data-open data-title="{{ .Params.windowTitle | default .Name }}">
+            <span class="start-menu-item-icon"><img src="/icons/xp/{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="24" height="24"></span>
+            {{ .Name }}
+          </a>
+          {{ end }}
+        </div>
+        <div class="start-menu-right">
+          {{ range site.Menus.main }}
+          <a href="{{ .URL }}" class="start-menu-item" data-open data-title="{{ .Params.windowTitle | default .Name }}">
+            <span class="start-menu-item-icon"><img src="/icons/xp/{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="24" height="24"></span>
+            {{ .Params.windowTitle | default .Name }}
+          </a>
+          {{ end }}
+          {{ with site.Params.resumeURL }}
+          <div class="start-menu-divider"></div>
+          <a href="{{ . | absURL }}" class="start-menu-item" target="_blank">
+            <span class="start-menu-item-icon"><img src="/icons/xp/GenericDocument.png" alt="" width="24" height="24"></span> My Resume
+          </a>
+          {{ end }}
+        </div>
+      </div>
+      <div class="start-menu-footer">
+        {{ with site.Params.github }}
+        <a class="start-menu-footer-btn" href="https://github.com/{{ . }}" target="_blank" rel="noopener">
+          <img src="/icons/xp/Logout.png" alt="" width="24" height="24">
+          GitHub
+        </a>
+        {{ end }}
+        {{ with site.Params.linkedin }}
+        <a class="start-menu-footer-btn" href="https://linkedin.com/in/{{ . }}" target="_blank" rel="noopener">
+          <img src="/icons/xp/InternetExplorer6.png" alt="" width="24" height="24">
+          LinkedIn
+        </a>
+        {{ end }}
+      </div>
+    </div>
+
+    <script>
+      (function() {
+        /* ---- Iframe detection ---- */
+        if (window.self !== window.top) {
+          document.documentElement.classList.add('in-iframe');
+          document.body.classList.add('in-iframe');
+
+          function iframeCollectImages() {
+            var imgs = [];
+            var seen = {};
+            document.querySelectorAll('figure').forEach(function(fig) {
+              var a = fig.querySelector('a[href]');
+              var imgEl = fig.querySelector('img');
+              var src = a ? a.getAttribute('href') : (imgEl ? imgEl.getAttribute('src') : null);
+              if (src && !seen[src]) {
+                seen[src] = true;
+                var cap = fig.querySelector('figcaption');
+                imgs.push({ src: src, title: (imgEl && imgEl.alt) || (cap && cap.textContent.trim()) || '' });
+              }
+            });
+            document.querySelectorAll('.prose img, .window-content img').forEach(function(imgEl) {
+              var src = imgEl.getAttribute('src');
+              if (src && !seen[src]) {
+                seen[src] = true;
+                imgs.push({ src: src, title: imgEl.alt || '' });
+              }
+            });
+            return imgs;
+          }
+
+          document.addEventListener('click', function(e) {
+            var fig = e.target.closest('figure');
+            if (fig) {
+              var a = fig.querySelector('a[href]');
+              var imgEl = fig.querySelector('img');
+              var src = a ? a.getAttribute('href') : (imgEl ? imgEl.getAttribute('src') : null);
+              if (src && /\.(jpe?g|png|gif|webp|avif|bmp|tiff?)$/i.test(src)) {
+                e.preventDefault();
+                if (window.parent.xpPhotoViewer) {
+                  var imgs = iframeCollectImages();
+                  var idx = 0;
+                  for (var i = 0; i < imgs.length; i++) { if (imgs[i].src === src) { idx = i; break; } }
+                  window.parent.xpPhotoViewer(imgs, idx);
+                }
+                return;
+              }
+            }
+
+            var img = e.target.closest('img');
+            if (img && !e.target.closest('a[href]')) {
+              var src = img.getAttribute('src');
+              if (src && /\.(jpe?g|png|gif|webp|avif|bmp|tiff?)$/i.test(src)) {
+                e.preventDefault();
+                if (window.parent.xpPhotoViewer) {
+                  var imgs = iframeCollectImages();
+                  var idx = 0;
+                  for (var i = 0; i < imgs.length; i++) { if (imgs[i].src === src) { idx = i; break; } }
+                  window.parent.xpPhotoViewer(imgs, idx);
+                }
+                return;
+              }
+            }
+
+            var link = e.target.closest('a[href]');
+            if (!link || link.getAttribute('target') === '_blank') return;
+            var href = link.getAttribute('href');
+            if (!href || href === '#' || href.startsWith('javascript:')) return;
+
+            try {
+              var linkUrl = new URL(href, location.origin);
+              if (linkUrl.origin !== location.origin) {
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener');
+                return;
+              }
+            } catch(ex) {}
+
+            if (/\.(jpe?g|png|gif|webp|avif|bmp|tiff?)$/i.test(href)) {
+              e.preventDefault();
+              if (window.parent.xpPhotoViewer) {
+                var imgs = iframeCollectImages();
+                var idx = 0;
+                for (var i = 0; i < imgs.length; i++) { if (imgs[i].src === href) { idx = i; break; } }
+                window.parent.xpPhotoViewer(imgs, idx);
+              }
+              return;
+            }
+
+            if (!window.parent.xpOpenWindow) return;
+            e.preventDefault();
+            var title = link.textContent.trim() || href.split('/').pop();
+            window.parent.xpOpenWindow(href, title);
+            try { window.parent.history.pushState({ xpUrl: href }, '', href); } catch(ex) {}
+          });
+          return;
+        }
+
+        /* ---- Mobile: Windows Mobile UI ---- */
+        var isMobile = window.matchMedia('(max-width: 768px)').matches;
+        if (isMobile) {
+          var wmStartBtn = document.getElementById('wm-start-btn');
+          var wmStartMenu = document.getElementById('wm-start-menu');
+          var wmClock = document.getElementById('wm-clock');
+          if (wmStartBtn && wmStartMenu) {
+            wmStartBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              wmStartMenu.classList.toggle('open');
+            });
+            document.addEventListener('click', function(e) {
+              if (!wmStartMenu.contains(e.target) && e.target !== wmStartBtn) wmStartMenu.classList.remove('open');
+            });
+            wmStartMenu.querySelectorAll('.wm-menu-item').forEach(function(item) {
+              item.addEventListener('click', function() { wmStartMenu.classList.remove('open'); });
+            });
+          }
+          if (wmClock) {
+            function wmUpdateClock() {
+              var d = new Date(), h = d.getHours(), m = d.getMinutes();
+              wmClock.textContent = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+            }
+            wmUpdateClock();
+            setInterval(wmUpdateClock, 15000);
+          }
+          var todayDate = document.getElementById('wm-today-date');
+          if (todayDate) {
+            var d = new Date();
+            var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            todayDate.textContent = days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+          }
+          return;
+        }
+
+        /* ---- Clock ---- */
+        function updateClock() {
+          var d = new Date(), h = d.getHours(), m = d.getMinutes();
+          var ampm = h >= 12 ? 'PM' : 'AM';
+          h = h % 12 || 12;
+          document.getElementById('xp-clock').textContent =
+            h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+        }
+        updateClock();
+        setInterval(updateClock, 15000);
+
+        /* ---- Start Menu ---- */
+        var startBtn = document.getElementById('start-btn');
+        var startMenu = document.getElementById('start-menu');
+        startBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          startMenu.classList.toggle('open');
+        });
+        document.addEventListener('click', function(e) {
+          if (!startMenu.contains(e.target)) startMenu.classList.remove('open');
+        });
+
+        /* ========================================
+           Window Manager
+           ======================================== */
+        var MIN_W = 280, MIN_H = 200;
+        var activeOp = null;
+        var zCounter = 50;
+        var widCounter = 0;
+        var taskbarContainer = document.querySelector('.taskbar-items');
+
+        /* Section → icon mapping (injected from Hugo config) */
+        var sectionIcons = {};
+        {{ range site.Menus.main -}}
+        {{ $url := .URL | strings.TrimRight "/" }}{{ with .Params.icon }}sectionIcons['{{ $url }}'] = '/icons/xp/{{ . }}.png';
+        {{ end }}{{ end }}
+
+        function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+        function px(v) { return parseInt(v, 10) || 0; }
+        function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+        function bringToFront(win) {
+          zCounter++;
+          win.style.zIndex = zCounter;
+        }
+
+        function normalizeUrl(raw) {
+          if (!raw) return '';
+          try { return new URL(raw, location.origin).pathname; } catch(e) { return raw; }
+        }
+
+        function lookupSectionIcon(url) {
+          var nUrl = url.replace(/\/$/, '');
+          for (var sec in sectionIcons) {
+            if (sec && (nUrl === sec || nUrl.indexOf(sec + '/') === 0)) {
+              return sectionIcons[sec];
+            }
+          }
+          return null;
+        }
+
+        /* ---- initWindow: wires drag/resize/buttons on any .xp-window ---- */
+        function initWindow(win) {
+          var desktop = win.closest('.desktop-area');
+          if (!desktop) return;
+
+          if (!win.querySelector('.resize-handle')) {
+            ['n','s','e','w','nw','ne','sw','se'].forEach(function(dir) {
+              var el = document.createElement('div');
+              el.className = 'resize-handle resize-' + dir;
+              el.dataset.dir = dir;
+              win.appendChild(el);
+            });
+          }
+
+          var titlebar = win.querySelector('.window-titlebar');
+          var btnMin   = win.querySelector('.btn-minimize');
+          var btnMax   = win.querySelector('.btn-maximize');
+          var btnClose = win.querySelector('.btn-close');
+          var minimized = false;
+          var maxRestore = null;
+
+          var tbItem = win._taskbarItem || null;
+
+          function stopAnim() { win.classList.remove('wm-animate'); }
+
+          win.addEventListener('mousedown', function() { bringToFront(win); });
+
+          /* ===== DRAG ===== */
+          function dragStart(x, y) {
+            if (win.classList.contains('maximized')) return;
+            stopAnim(); bringToFront(win);
+            activeOp = {
+              type: 'drag', win: win,
+              sx: x, sy: y,
+              sl: px(win.style.left), st: px(win.style.top)
+            };
+            document.body.classList.add('wm-dragging');
+          }
+          titlebar.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.window-controls')) return;
+            dragStart(e.clientX, e.clientY); e.preventDefault();
+          });
+          titlebar.addEventListener('touchstart', function(e) {
+            if (e.target.closest('.window-controls')) return;
+            dragStart(e.touches[0].clientX, e.touches[0].clientY);
+          }, { passive: true });
+
+          /* ===== RESIZE ===== */
+          win.querySelectorAll('.resize-handle').forEach(function(h) {
+            function rs(x, y) {
+              if (win.classList.contains('maximized')) return;
+              stopAnim(); bringToFront(win);
+              activeOp = {
+                type: 'resize', win: win, dir: h.dataset.dir,
+                sx: x, sy: y,
+                sl: px(win.style.left), st: px(win.style.top),
+                sw: win.offsetWidth, sh: win.offsetHeight
+              };
+              document.body.classList.add('wm-resizing');
+            }
+            h.addEventListener('mousedown', function(e) { rs(e.clientX, e.clientY); e.preventDefault(); e.stopPropagation(); });
+            h.addEventListener('touchstart', function(e) { rs(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: true });
+          });
+
+          /* ===== MAXIMIZE ===== */
+          function toggleMax() {
+            win.classList.add('wm-animate');
+            setTimeout(function(){ win.classList.remove('wm-animate'); }, 250);
+            var dR = desktop.getBoundingClientRect();
+            if (win.classList.contains('maximized')) {
+              if (maxRestore) {
+                win.style.left = maxRestore.l; win.style.top = maxRestore.t;
+                win.style.width = maxRestore.w; win.style.height = maxRestore.h;
+              }
+              win.classList.remove('maximized');
+              maxRestore = null;
+            } else {
+              maxRestore = { l: win.style.left, t: win.style.top, w: win.style.width, h: win.style.height };
+              win.style.left = '0'; win.style.top = '0';
+              win.style.width = dR.width + 'px'; win.style.height = dR.height + 'px';
+              win.classList.add('maximized');
+            }
+          }
+          if (btnMax) btnMax.addEventListener('click', function(e) { e.stopPropagation(); toggleMax(); });
+          titlebar.addEventListener('dblclick', function(e) {
+            if (e.target.closest('.window-controls')) return; toggleMax();
+          });
+
+          /* ===== MINIMIZE ===== */
+          function doMinimize() {
+            win.classList.add('minimized'); minimized = true;
+            if (tbItem) tbItem.classList.remove('active');
+          }
+          function doRestore() {
+            win.classList.remove('minimized'); minimized = false;
+            bringToFront(win);
+            if (tbItem) tbItem.classList.add('active');
+          }
+          if (btnMin) btnMin.addEventListener('click', function(e) { e.stopPropagation(); if (!minimized) doMinimize(); });
+
+          function wireTaskbar(item) {
+            tbItem = item;
+            win._taskbarItem = item;
+            if (minimized) item.classList.remove('active');
+            item.addEventListener('click', function(e) {
+              e.preventDefault();
+              if (minimized) doRestore();
+              else bringToFront(win);
+            });
+          }
+          if (win._taskbarItem) wireTaskbar(win._taskbarItem);
+
+          /* ===== CLOSE ===== */
+          if (btnClose) btnClose.addEventListener('click', function() {
+            if (btnClose.hasAttribute('data-close-window')) {
+              doMinimize();
+            } else if (win._dynamic) {
+              if (tbItem && tbItem.parentNode) tbItem.parentNode.removeChild(tbItem);
+              if (win.parentNode) win.parentNode.removeChild(win);
+            } else {
+              var href = btnClose.getAttribute('data-href');
+              if (href) window.location = href;
+            }
+          });
+
+          win._wireTaskbar = wireTaskbar;
+          win._doRestore = doRestore;
+          win._doMinimize = doMinimize;
+        }
+
+        /* ---- positionWindow: centres a pre-rendered window ---- */
+        function positionWindow(win) {
+          var desktop = win.closest('.desktop-area');
+          if (!desktop) return;
+          var dR = desktop.getBoundingClientRect();
+          var dW = dR.width, dH = dR.height;
+
+          var w = win.offsetWidth;
+          if (w > dW) w = dW;
+          if (w < MIN_W) w = MIN_W;
+
+          var inlineH = win.style.height;
+          var h;
+          if (inlineH && inlineH.indexOf('%') !== -1) {
+            h = Math.round(dH * parseInt(inlineH) / 100);
+          } else if (inlineH && inlineH.indexOf('px') !== -1) {
+            h = parseInt(inlineH);
+          } else {
+            h = Math.min(win.offsetHeight, Math.round(dH * 0.85));
+          }
+          if (h > dH) h = dH;
+          if (h < MIN_H) h = MIN_H;
+
+          win.style.width = w + 'px';
+          win.style.height = h + 'px';
+          win.style.left = Math.max(0, Math.round((dW - w) / 2)) + 'px';
+          win.style.top  = Math.max(0, Math.round((dH - h) / 2)) + 'px';
+          win.style.maxWidth = 'none';
+          win.style.maxHeight = 'none';
+          win.classList.add('wm-init');
+          bringToFront(win);
+        }
+
+        /* ---- openWindow: creates a dynamic window with iframe ---- */
+        var openCount = 0;
+        window.xpOpenWindow = function(url, title, opts) {
+          opts = opts || {};
+          var nUrl = normalizeUrl(url);
+
+          var existing = document.querySelectorAll('.desktop-area .xp-window');
+          for (var ei = 0; ei < existing.length; ei++) {
+            if (existing[ei]._url === nUrl) {
+              if (existing[ei]._doRestore) existing[ei]._doRestore();
+              bringToFront(existing[ei]);
+              return existing[ei];
+            }
+          }
+
+          var desktop = document.querySelector('.desktop-area');
+          var dR = desktop.getBoundingClientRect();
+          var isPdf = opts.pdf || /\.pdf$/i.test(url);
+          var defW = isPdf ? 700 : Math.min(Math.round(dR.width * 0.8), 820);
+          var w = opts.width  || defW;
+          var h = opts.height || Math.round(dR.height * 0.85);
+          var l, t;
+          if (opts.left !== undefined) {
+            l = clamp(opts.left, 0, dR.width - 80);
+            t = clamp(opts.top || 0, 0, dR.height - 30);
+          } else {
+            var offset = openCount * 26;
+            openCount++;
+            l = Math.max(0, Math.round((dR.width - w) / 2) + offset % 100);
+            t = Math.max(0, Math.round((dR.height - h) / 2) + offset % 60);
+          }
+
+          var winTitle = isPdf ? url.split('/').pop() + ' \u2014 Document Viewer' : title;
+
+          var win = document.createElement('div');
+          win.className = 'xp-window wm-init';
+          win._dynamic = true;
+          win._url = nUrl;
+          win._wid = 'dyn-' + Date.now() + '-' + (++widCounter);
+          win.style.cssText = 'width:'+w+'px;height:'+h+'px;left:'+l+'px;top:'+t+'px;max-width:none;max-height:none;';
+
+          var iconSrc = lookupSectionIcon(url) || '/icons/xp/Explorer.png';
+          if (isPdf) iconSrc = '/icons/xp/GenericDocument.png';
+
+          win.innerHTML =
+            '<div class="window-titlebar">' +
+              '<div class="window-titlebar-icon"><img src="' + iconSrc + '" alt="" width="16" height="16"></div>' +
+              '<span class="window-title">' + esc(winTitle) + '</span>' +
+              '<div class="window-controls">' +
+                '<button class="btn-minimize" title="Minimize">\u2212</button>' +
+                '<button class="btn-maximize" title="Maximize">\u25FB</button>' +
+                '<button class="btn-close" title="Close">\u2715</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="window-content" style="padding:0;overflow:hidden;">' +
+              '<iframe src="' + esc(url) + '" style="width:100%;height:100%;border:none;"></iframe>' +
+            '</div>';
+
+          desktop.appendChild(win);
+
+          var tbItem = document.createElement('a');
+          tbItem.className = 'taskbar-item active';
+          tbItem.href = '#';
+          tbItem.innerHTML = '<img class="taskbar-item-icon" src="' + esc(iconSrc) + '" alt="" width="16" height="16"><span class="taskbar-item-text">' + esc(winTitle) + '</span>';
+          taskbarContainer.appendChild(tbItem);
+          win._taskbarItem = tbItem;
+
+          initWindow(win);
+          bringToFront(win);
+          return win;
+        };
+
+        /* ---- Photo Viewer (Windows Picture and Fax Viewer) ---- */
+        window.xpPhotoViewer = function(images, startIndex) {
+          var desktop = document.querySelector('.desktop-area');
+          var dR = desktop.getBoundingClientRect();
+          var idx = startIndex || 0;
+          var cur = images[idx];
+          var fileName = cur.src.split('/').pop();
+
+          var w = Math.min(Math.round(dR.width * 0.65), 720);
+          var h = Math.min(Math.round(dR.height * 0.75), 560);
+          var l = Math.max(0, Math.round((dR.width - w) / 2));
+          var t = Math.max(0, Math.round((dR.height - h) / 2));
+
+          var pvSvg = {
+            prev: '<svg viewBox="0 0 18 18"><path d="M11 4L6 9l5 5" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+            next: '<svg viewBox="0 0 18 18"><path d="M7 4l5 5-5 5" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+            fit: '<svg viewBox="0 0 18 18"><rect x="2" y="2" width="14" height="14" rx="1.5" fill="none" stroke="#333" stroke-width="1.4"/><path d="M5 12l2.5-3 2 1.5L12 7" fill="none" stroke="#369" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6.5" cy="6.5" r="1.2" fill="#E8A020"/></svg>',
+            actual: '<svg viewBox="0 0 18 18"><rect x="2" y="2" width="14" height="14" rx="1.5" fill="none" stroke="#333" stroke-width="1.4"/><text x="9" y="12.5" text-anchor="middle" font-size="8" font-weight="bold" font-family="Tahoma,sans-serif" fill="#333">1:1</text></svg>',
+            zoomIn: '<svg viewBox="0 0 18 18"><circle cx="7.5" cy="7.5" r="5" fill="none" stroke="#333" stroke-width="1.4"/><line x1="11.2" y1="11.2" x2="15" y2="15" stroke="#333" stroke-width="1.6" stroke-linecap="round"/><line x1="5.5" y1="7.5" x2="9.5" y2="7.5" stroke="#333" stroke-width="1.3" stroke-linecap="round"/><line x1="7.5" y1="5.5" x2="7.5" y2="9.5" stroke="#333" stroke-width="1.3" stroke-linecap="round"/></svg>',
+            zoomOut: '<svg viewBox="0 0 18 18"><circle cx="7.5" cy="7.5" r="5" fill="none" stroke="#333" stroke-width="1.4"/><line x1="11.2" y1="11.2" x2="15" y2="15" stroke="#333" stroke-width="1.6" stroke-linecap="round"/><line x1="5.5" y1="7.5" x2="9.5" y2="7.5" stroke="#333" stroke-width="1.3" stroke-linecap="round"/></svg>',
+            rotateCW: '<svg viewBox="0 0 18 18"><path d="M13 6.5A5 5 0 1 0 11 13" fill="none" stroke="#333" stroke-width="1.4" stroke-linecap="round"/><path d="M15 3.5v4h-4" fill="none" stroke="#333" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+            rotateCCW: '<svg viewBox="0 0 18 18"><path d="M5 6.5A5 5 0 1 1 7 13" fill="none" stroke="#333" stroke-width="1.4" stroke-linecap="round"/><path d="M3 3.5v4h4" fill="none" stroke="#333" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+          };
+
+          var win = document.createElement('div');
+          win.className = 'xp-window wm-init';
+          win._dynamic = true;
+          win._url = '__photo_viewer_' + Date.now() + '__';
+          win._wid = 'photo-' + Date.now() + '-' + (++widCounter);
+          win.style.cssText = 'width:'+w+'px;height:'+h+'px;left:'+l+'px;top:'+t+'px;max-width:none;max-height:none;';
+
+          win.innerHTML =
+            '<div class="window-titlebar">' +
+              '<div class="window-titlebar-icon"><img src="/icons/xp/WindowsPictureandFaxViewer.png" alt="" width="16" height="16"></div>' +
+              '<span class="window-title">Windows Picture and Fax Viewer - ' + esc(fileName) + '</span>' +
+              '<div class="window-controls">' +
+                '<button class="btn-minimize" title="Minimize">\u2212</button>' +
+                '<button class="btn-maximize" title="Maximize">\u25FB</button>' +
+                '<button class="btn-close" title="Close">\u2715</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="xp-photo-viewer">' +
+              '<img src="' + esc(cur.src) + '" alt="' + esc(cur.title || fileName) + '" draggable="false">' +
+            '</div>' +
+            '<div class="xp-photo-toolbar">' +
+              '<button class="pv-prev" title="Previous Image (Left)">' + pvSvg.prev + '</button>' +
+              '<button class="pv-next" title="Next Image (Right)">' + pvSvg.next + '</button>' +
+              '<div class="pv-sep"></div>' +
+              '<button class="pv-fit pv-active" title="Best Fit (Ctrl+0)">' + pvSvg.fit + '</button>' +
+              '<button class="pv-actual" title="Actual Size (Ctrl+1)">' + pvSvg.actual + '</button>' +
+              '<div class="pv-sep"></div>' +
+              '<button class="pv-zin" title="Zoom In (+)">' + pvSvg.zoomIn + '</button>' +
+              '<button class="pv-zout" title="Zoom Out (-)">' + pvSvg.zoomOut + '</button>' +
+              '<div class="pv-sep"></div>' +
+              '<button class="pv-rcw" title="Rotate Clockwise (Ctrl+K)">' + pvSvg.rotateCW + '</button>' +
+              '<button class="pv-rccw" title="Rotate Counter-Clockwise (Ctrl+L)">' + pvSvg.rotateCCW + '</button>' +
+              '<div class="pv-sep"></div>' +
+              '<span class="xp-photo-counter">' + (idx + 1) + ' / ' + images.length + '</span>' +
+            '</div>';
+
+          desktop.appendChild(win);
+
+          var tbItem = document.createElement('a');
+          tbItem.className = 'taskbar-item active';
+          tbItem.href = '#';
+          tbItem.innerHTML = '<img class="taskbar-item-icon" src="/icons/xp/WindowsPictureandFaxViewer.png" alt="" width="16" height="16"><span class="taskbar-item-text">' + esc('Picture Viewer - ' + fileName) + '</span>';
+          taskbarContainer.appendChild(tbItem);
+          win._taskbarItem = tbItem;
+
+          initWindow(win);
+          bringToFront(win);
+
+          var viewer = win.querySelector('.xp-photo-viewer');
+          var photoImg = viewer.querySelector('img');
+          var titleEl = win.querySelector('.window-title');
+          var counterEl = win.querySelector('.xp-photo-counter');
+          var prevBtn = win.querySelector('.pv-prev');
+          var nextBtn = win.querySelector('.pv-next');
+          var fitBtn = win.querySelector('.pv-fit');
+          var actualBtn = win.querySelector('.pv-actual');
+          var zInBtn = win.querySelector('.pv-zin');
+          var zOutBtn = win.querySelector('.pv-zout');
+          var rcwBtn = win.querySelector('.pv-rcw');
+          var rccwBtn = win.querySelector('.pv-rccw');
+          var rotation = 0;
+          var zoom = 1;
+          var fitMode = true;
+
+          function updateNav() {
+            prevBtn.disabled = images.length <= 1 || idx === 0;
+            nextBtn.disabled = images.length <= 1 || idx >= images.length - 1;
+            counterEl.textContent = (idx + 1) + ' / ' + images.length;
+          }
+
+          function applyTransform() {
+            var t = '';
+            if (rotation) t += 'rotate(' + rotation + 'deg) ';
+            if (!fitMode) t += 'scale(' + zoom + ') ';
+            photoImg.style.transform = t || 'none';
+            photoImg.style.transformOrigin = fitMode ? 'center center' : '0 0';
+          }
+
+          function setFitMode() {
+            fitMode = true;
+            zoom = 1;
+            viewer.classList.remove('pv-actual');
+            photoImg.style.transform = rotation ? 'rotate(' + rotation + 'deg)' : 'none';
+            photoImg.style.transformOrigin = 'center center';
+          }
+
+          function setActualMode() {
+            fitMode = false;
+            zoom = 1;
+            viewer.classList.add('pv-actual');
+            applyTransform();
+          }
+
+          function showImage(i) {
+            idx = clamp(i, 0, images.length - 1);
+            var img = images[idx];
+            var fn = img.src.split('/').pop();
+            photoImg.src = img.src;
+            photoImg.alt = img.title || fn;
+            titleEl.textContent = 'Windows Picture and Fax Viewer - ' + fn;
+            tbItem.querySelector('.taskbar-item-text').textContent = 'Picture Viewer - ' + fn;
+            rotation = 0;
+            setFitMode();
+            updateNav();
+          }
+
+          updateNav();
+
+          prevBtn.addEventListener('click', function() { if (idx > 0) showImage(idx - 1); });
+          nextBtn.addEventListener('click', function() { if (idx < images.length - 1) showImage(idx + 1); });
+          fitBtn.addEventListener('click', setFitMode);
+          actualBtn.addEventListener('click', setActualMode);
+
+          zInBtn.addEventListener('click', function() {
+            if (fitMode) setActualMode();
+            zoom = Math.min(zoom * 1.25, 8);
+            applyTransform();
+          });
+          zOutBtn.addEventListener('click', function() {
+            if (fitMode) setActualMode();
+            zoom = Math.max(zoom / 1.25, 0.1);
+            applyTransform();
+          });
+          rcwBtn.addEventListener('click', function() { rotation = (rotation + 90) % 360; applyTransform(); });
+          rccwBtn.addEventListener('click', function() { rotation = (rotation - 90 + 360) % 360; applyTransform(); });
+
+          function isTopWindow() {
+            if (!win.parentNode) return false;
+            var topZ = 0;
+            document.querySelectorAll('.desktop-area .xp-window').forEach(function(w) {
+              if (!w.classList.contains('minimized')) topZ = Math.max(topZ, parseInt(w.style.zIndex) || 0);
+            });
+            return (parseInt(win.style.zIndex) || 0) >= topZ;
+          }
+
+          function onKeyDown(e) {
+            if (!win.parentNode) { document.removeEventListener('keydown', onKeyDown); return; }
+            if (!isTopWindow()) return;
+            var k = e.key;
+            if (k === 'ArrowLeft') { e.preventDefault(); if (idx > 0) showImage(idx - 1); }
+            else if (k === 'ArrowRight') { e.preventDefault(); if (idx < images.length - 1) showImage(idx + 1); }
+            else if (k === '+' || k === '=') { e.preventDefault(); zInBtn.click(); }
+            else if (k === '-') { e.preventDefault(); zOutBtn.click(); }
+            else if (e.ctrlKey && k === '0') { e.preventDefault(); setFitMode(); }
+            else if (e.ctrlKey && k === '1') { e.preventDefault(); setActualMode(); }
+          }
+          document.addEventListener('keydown', onKeyDown);
+
+          photoImg.addEventListener('load', function() {
+            var natW = photoImg.naturalWidth;
+            var natH = photoImg.naturalHeight;
+            if (!natW || !natH) return;
+            var chromeH = 30 + 34 + 6;
+            var maxW = Math.round(dR.width * 0.9);
+            var maxH = Math.round(dR.height * 0.9);
+            var wantW = natW + 6;
+            var wantH = natH + chromeH;
+            var scale = Math.min(1, maxW / wantW, maxH / wantH);
+            var finalW = Math.max(MIN_W, Math.round(wantW * scale));
+            var finalH = Math.max(MIN_H, Math.round(wantH * scale));
+            win.style.width = finalW + 'px';
+            win.style.height = finalH + 'px';
+            win.style.left = Math.max(0, Math.round((dR.width - finalW) / 2)) + 'px';
+            win.style.top = Math.max(0, Math.round((dR.height - finalH) / 2)) + 'px';
+          }, { once: true });
+
+          return win;
+        };
+
+        /* Init pre-rendered windows */
+        document.querySelectorAll('.xp-window').forEach(function(win) {
+          win._wid = win.id;
+          var dataUrl = win.getAttribute('data-url');
+          if (dataUrl) {
+            win._url = normalizeUrl(dataUrl);
+          } else {
+            var pIframe = win.querySelector('iframe');
+            if (pIframe) win._url = normalizeUrl(pIframe.getAttribute('src'));
+            else win._url = normalizeUrl(location.pathname);
+          }
+          positionWindow(win);
+          initWindow(win);
+        });
+
+        /* Wire pre-rendered homepage window to its taskbar item */
+        var homeWin = document.getElementById('home-window');
+        var homeTb  = document.getElementById('home-window-taskbar-item');
+        if (homeWin && homeTb && homeWin._wireTaskbar) {
+          homeWin._wireTaskbar(homeTb);
+        }
+
+        /* Open window from URL on initial load (for shared links) */
+        (function() {
+          if (!document.body.classList.contains('xp-desktop')) return;
+          var path = normalizeUrl(location.pathname);
+          if (!path || path === '/') return;
+          if (document.querySelector('.desktop-area .xp-window[data-url]')) return;
+          var link = document.querySelector('[data-open][href="' + path + '"]');
+          var title = link ? (link.getAttribute('data-title') || link.textContent.trim()) : path.replace(/\//g, ' ').trim();
+          window.xpOpenWindow(path, title);
+        })();
+
+        /* ---- data-open links: open in window instead of navigating ---- */
+        document.querySelectorAll('[data-open]').forEach(function(link) {
+          link.addEventListener('click', function(e) {
+            if (!document.body.classList.contains('xp-desktop') || document.body.classList.contains('in-iframe')) return;
+            e.preventDefault();
+            var url = link.getAttribute('href');
+            var title = link.getAttribute('data-title') || link.textContent.trim();
+            if (url) {
+              window.xpOpenWindow(url, title);
+              try { history.pushState({ xpUrl: url }, '', url); } catch(ex) {}
+            }
+            startMenu.classList.remove('open');
+          });
+        });
+
+        /* ---- Image clicks in pre-rendered windows ---- */
+        document.addEventListener('click', function(e) {
+          if (document.body.classList.contains('in-iframe')) return;
+          var fig = e.target.closest('figure');
+          var imgEl = fig ? fig.querySelector('img') : e.target.closest('.prose img, .window-content img');
+          if (!fig && !imgEl) return;
+          var a = fig ? fig.querySelector('a[href]') : null;
+          var src = a ? a.getAttribute('href') : (imgEl ? imgEl.getAttribute('src') : null);
+          if (!src || !/\.(jpe?g|png|gif|webp|avif|bmp|tiff?)$/i.test(src)) return;
+          e.preventDefault();
+          var container = (fig || imgEl).closest('.window-content') || document;
+          var imgs = [], seen = {};
+          container.querySelectorAll('figure').forEach(function(f) {
+            var fa = f.querySelector('a[href]');
+            var fi = f.querySelector('img');
+            var s = fa ? fa.getAttribute('href') : (fi ? fi.getAttribute('src') : null);
+            if (s && !seen[s]) { seen[s] = true; var c = f.querySelector('figcaption'); imgs.push({ src: s, title: (fi && fi.alt) || (c && c.textContent.trim()) || '' }); }
+          });
+          container.querySelectorAll('.prose img').forEach(function(i) {
+            var s = i.getAttribute('src');
+            if (s && !seen[s]) { seen[s] = true; imgs.push({ src: s, title: i.alt || '' }); }
+          });
+          if (imgs.length === 0) imgs.push({ src: src, title: (imgEl && imgEl.alt) || '' });
+          var idx = 0;
+          for (var i = 0; i < imgs.length; i++) { if (imgs[i].src === src) { idx = i; break; } }
+          window.xpPhotoViewer(imgs, idx);
+        });
+
+        /* ---- Handle back/forward navigation ---- */
+        window.addEventListener('popstate', function() {
+          var path = location.pathname;
+          var wins = document.querySelectorAll('.desktop-area .xp-window');
+          for (var i = 0; i < wins.length; i++) {
+            if (wins[i]._url === path) {
+              if (wins[i]._doRestore) wins[i]._doRestore();
+              bringToFront(wins[i]);
+              return;
+            }
+          }
+        });
+
+        /* ---- resetDesktop.exe ---- */
+        var resetIcon = document.getElementById('reset-desktop-icon');
+        if (resetIcon) {
+          resetIcon.style.display = '';
+          resetIcon.addEventListener('click', function(e) {
+            e.preventDefault();
+            location.href = '/';
+          });
+        }
+
+        /* ---- Deterministic positioning for scattered shortcuts ---- */
+        (function() {
+          function seededRand(seed) {
+            var x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+            return x - Math.floor(x);
+          }
+          function seededRand2(seed) {
+            var x = Math.sin(seed * 269.5 + 183.3) * 43758.5453;
+            return x - Math.floor(x);
+          }
+          var files = document.querySelectorAll('.desktop-file-scattered');
+          var desktop = document.querySelector('.desktop-area');
+          if (desktop && files.length) {
+            var dW = desktop.offsetWidth, dH = desktop.offsetHeight;
+            var iconW = 80, iconH = 80, safeLeft = 100;
+            files.forEach(function(f) {
+              var seed = parseInt(f.getAttribute('data-seed') || '0', 10);
+              var rx = seededRand(seed + 1), ry = seededRand2(seed + 1);
+              f.style.position = 'absolute';
+              f.style.left = Math.round(safeLeft + rx * (dW - safeLeft - iconW - 20)) + 'px';
+              f.style.top  = Math.round(10 + ry * (dH - iconH - 30)) + 'px';
+            });
+          }
+        })();
+
+        /* ===== Global pointer tracking ===== */
+        function ptrMove(x, y) {
+          if (!activeOp) return;
+          var o = activeOp, w = o.win;
+          var dR = w.closest('.desktop-area').getBoundingClientRect();
+          if (o.type === 'drag') {
+            w.style.left = clamp(o.sl + (x - o.sx), -(w.offsetWidth - 80), dR.width - 80) + 'px';
+            w.style.top  = clamp(o.st + (y - o.sy), 0, dR.height - 30) + 'px';
+          }
+          if (o.type === 'resize') {
+            var dx = x - o.sx, dy = y - o.sy, d = o.dir;
+            var nw = o.sw, nh = o.sh, nl = o.sl, nt = o.st;
+            if (d.indexOf('e') !== -1) nw = Math.max(MIN_W, o.sw + dx);
+            if (d.indexOf('s') !== -1) nh = Math.max(MIN_H, o.sh + dy);
+            if (d.indexOf('w') !== -1) { nw = Math.max(MIN_W, o.sw - dx); if (nw > MIN_W) nl = o.sl + dx; }
+            if (d.indexOf('n') !== -1) { nh = Math.max(MIN_H, o.sh - dy); if (nh > MIN_H) nt = o.st + dy; }
+            w.style.width = nw + 'px'; w.style.height = nh + 'px';
+            w.style.left = nl + 'px'; w.style.top = nt + 'px';
+          }
+        }
+        function ptrEnd() {
+          if (!activeOp) return;
+          document.body.classList.remove('wm-dragging', 'wm-resizing');
+          activeOp = null;
+        }
+        document.addEventListener('mousemove', function(e) { ptrMove(e.clientX, e.clientY); });
+        document.addEventListener('touchmove', function(e) {
+          if (activeOp) { ptrMove(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }
+        }, { passive: false });
+        document.addEventListener('mouseup',  ptrEnd);
+        document.addEventListener('touchend', ptrEnd);
+      })();
+    </script>
+
+  </body>
+</html>

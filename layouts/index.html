@@ -1,0 +1,82 @@
+{{ define "main" }}
+
+{{/* Home window configuration */}}
+{{- $hwURL := "/about/" -}}
+{{- $hwTitle := "About Me — System Properties" -}}
+{{- $hwIcon := "SystemProperties" -}}
+{{- with site.Params.xp -}}
+  {{- with .homeWindow -}}{{- $hwURL = . -}}{{- end -}}
+  {{- with .homeWindowTitle -}}{{- $hwTitle = . -}}{{- end -}}
+  {{- with .homeWindowIcon -}}{{- $hwIcon = . -}}{{- end -}}
+{{- end -}}
+
+{{- $hwPage := site.GetPage $hwURL -}}
+
+{{ with $hwPage }}
+<!-- Desktop: Home Window (opens on load) -->
+<div class="xp-window" id="home-window" style="width:650px; height:80%;">
+  <div class="window-titlebar">
+    <div class="window-titlebar-icon">
+      <img src="/icons/xp/{{ $hwIcon }}.png" alt="" width="16" height="16">
+    </div>
+    <span class="window-title">{{ $hwTitle }}</span>
+    <div class="window-controls">
+      <button class="btn-minimize" title="Minimize">&#8722;</button>
+      <button class="btn-maximize" title="Maximize">&#9723;</button>
+      <button class="btn-close" title="Close" data-close-window>&#10005;</button>
+    </div>
+  </div>
+  <div class="window-content" style="padding:0; overflow:hidden; display:flex; flex-direction:column;">
+    <iframe id="home-iframe" src="{{ $hwURL | absURL }}" style="width:100%; flex:1; border:none;"></iframe>
+  </div>
+</div>
+{{ end }}
+
+<!-- Mobile: WM2003 Today screen -->
+<div class="mobile-today-screen">
+  <div class="wm2003-today">
+    <div class="wm2003-today-bg">
+      <div class="wm2003-today-header">
+        <div class="wm2003-today-date" id="wm-today-date"></div>
+      </div>
+      <div class="wm2003-today-owner">
+        {{ with site.Params.avatar }}
+        <img class="wm2003-avatar" src="{{ . }}" alt="{{ site.Params.name }}">
+        {{ end }}
+        <div>
+          <div class="wm2003-owner-name">{{ site.Params.name }}</div>
+          <div class="wm2003-owner-bio">{{ site.Params.bio }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="wm2003-today-items">
+      {{ range site.Menus.main }}
+      <a href="{{ .URL }}" class="wm2003-today-item">
+        <img src="/icons/xp/{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="16" height="16">
+        <span>{{ .Name }}</span>
+      </a>
+      {{ end }}
+      {{ with site.Params.resumeURL }}
+      <a href="{{ . | absURL }}" class="wm2003-today-item" target="_blank">
+        <img src="/icons/xp/GenericDocument.png" alt="" width="16" height="16">
+        <span>Resume (PDF)</span>
+      </a>
+      {{ end }}
+      {{ with site.Params.github }}
+      <a href="https://github.com/{{ . }}" class="wm2003-today-item" target="_blank" rel="noopener">
+        <img src="/icons/xp/InternetExplorer6.png" alt="" width="16" height="16">
+        <span>GitHub</span>
+      </a>
+      {{ end }}
+    </div>
+    {{ with $hwPage }}
+    <div class="wm2003-today-about">
+      <div class="prose">
+        {{ .Content }}
+      </div>
+    </div>
+    {{ end }}
+  </div>
+</div>
+
+{{ end }}

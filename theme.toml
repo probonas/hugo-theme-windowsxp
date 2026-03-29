@@ -1,0 +1,12 @@
+name = "Windows XP"
+license = "MIT"
+licenselink = "https://github.com/probonas/hugo-theme-windowsxp/blob/main/LICENSE"
+description = "A Windows XP-inspired Hugo theme with a full desktop experience — draggable windows, start menu, taskbar, and a Windows Mobile 2003 interface for mobile devices."
+homepage = "https://github.com/probonas/hugo-theme-windowsxp/"
+tags = ["Windows XP", "Retro", "Desktop", "Personal", "Blog", "Portfolio", "Responsive"]
+features = ["Responsive", "Desktop Simulation", "Window Manager", "Start Menu", "Taskbar", "Mobile"]
+min_version = "0.112.0"
+
+[author]
+  name = "probonas"
+  homepage = "https://github.com/probonas"

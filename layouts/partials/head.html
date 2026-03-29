@@ -1,0 +1,43 @@
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
+
+    <title>{{ if not .IsHome }}{{ .Title }} - {{ end }}{{ site.Title }}</title>
+
+    {{ $site_author := site.Params.name | default site.Title }}
+    {{ if eq .Kind "page" }}
+    <meta name="description" content="{{ .Summary }}" />
+    <meta name="author" content="{{ or .Params.author $site_author }}" />
+    {{ else }}
+    <meta name="description" content="{{ site.Params.description | default `A personal website` }}" />
+    <meta name="author" content="{{ $site_author }}" />
+    {{ end }}
+
+    {{ $typo := resources.Get "css/typography.css" }}
+    {{ $xp := resources.Get "css/xp.css" }}
+    {{ $css := slice $typo $xp | resources.Concat "css/bundle.css" | minify }}
+    <link rel="preload stylesheet" as="style" href="{{ $css.Permalink }}" />
+
+    {{ with site.Params.xp }}{{ with .wallpaper }}
+    <style>:root { --xp-wallpaper: url('{{ . }}'); }</style>
+    {{ end }}{{ end }}
+
+    <link rel="icon" href="{{ site.Params.favicon | default `favicon.ico` | absURL }}" />
+    <link rel="apple-touch-icon" href="{{ site.Params.appleTouchIcon | default `apple-touch-icon.png` | absURL }}" />
+
+    {{ hugo.Generator }}
+
+    {{ if or hugo.IsProduction (eq site.Params.env "production") }}
+    {{ template "_internal/google_analytics.html" . }}
+    {{ template "_internal/opengraph.html" . }}
+    {{ template "_internal/twitter_cards.html" . }}
+    {{ range .AlternativeOutputFormats }}
+    <link rel="{{ .Rel }}" type="{{ .MediaType.Type }}" href="{{ .Permalink }}" title="{{ site.Title }}" />
+    {{ end }}
+    {{ end }}
+
+    <link rel="canonical" href="{{ .Permalink }}" />
+
+    <script>if(window.self!==window.top){document.documentElement.classList.add('in-iframe')}</script>
+</head>
