@@ -1,4 +1,4 @@
-baseURL = 'https://example.com/'
+baseURL = 'https://probonas.github.io/hugo-theme-windowsxp/'
 languageCode = 'en-us'
 title = 'My XP Website'
 theme = 'hugo-theme-windowsxp'
