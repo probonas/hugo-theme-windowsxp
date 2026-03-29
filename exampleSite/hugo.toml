@@ -9,7 +9,7 @@ enableRobotsTXT = true
 name = 'John Doe'
 bio = 'A software developer from the Internet'
 description = 'Personal website of John Doe'
-avatar = '/icons/xp/Rover.png'
+avatar = 'icons/xp/Rover.png'
 favicon = 'favicon.ico'
 
 # Social links (optional)

@@ -6,6 +6,8 @@
     {{/* ===== Section icon lookup helpers ===== */}}
     {{- $sectionIconDefaults := dict "blog" "MyDocuments" "posts" "MyDocuments" "projects" "MyComputer" "about" "SystemProperties" -}}
     {{- $mainSections := site.Params.mainSections | default (slice "blog" "posts") -}}
+    {{- $iconBase := "icons/xp/" | relURL -}}
+    {{- $homeURL := site.Home.RelPermalink -}}
 
     <!-- Windows Mobile 2003 shell (mobile only) -->
     <div class="wm-navbar">
@@ -35,13 +37,13 @@
     </div>
 
     <div class="wm-start-menu" id="wm-start-menu">
-      <a href="/" class="wm-menu-item">
-        <img src="/icons/xp/Desktop.png" alt="" width="20" height="20">
+      <a href="{{ $homeURL }}" class="wm-menu-item">
+        <img src="{{ $iconBase }}Desktop.png" alt="" width="20" height="20">
         <span>Home</span>
       </a>
       {{ range site.Menus.main }}
       <a href="{{ .URL }}" class="wm-menu-item">
-        <img src="/icons/xp/{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="20" height="20">
+        <img src="{{ $iconBase }}{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="20" height="20">
         <span>{{ .Name }}</span>
       </a>
       {{ end }}
@@ -49,27 +51,27 @@
       <div class="wm-menu-sep"></div>
       {{ end }}
       {{ with site.Params.resumeURL }}
-      <a href="{{ . | absURL }}" class="wm-menu-item" target="_blank">
-        <img src="/icons/xp/GenericDocument.png" alt="" width="20" height="20">
+      <a href="{{ . | relURL }}" class="wm-menu-item" target="_blank">
+        <img src="{{ $iconBase }}GenericDocument.png" alt="" width="20" height="20">
         <span>Resume</span>
       </a>
       {{ end }}
       {{ with site.Params.github }}
       <a href="https://github.com/{{ . }}" class="wm-menu-item" target="_blank" rel="noopener">
-        <img src="/icons/xp/InternetExplorer6.png" alt="" width="20" height="20">
+        <img src="{{ $iconBase }}InternetExplorer6.png" alt="" width="20" height="20">
         <span>GitHub</span>
       </a>
       {{ end }}
       {{ with site.Params.linkedin }}
       <a href="https://linkedin.com/in/{{ . }}" class="wm-menu-item" target="_blank" rel="noopener">
-        <img src="/icons/xp/Briefcase.png" alt="" width="20" height="20">
+        <img src="{{ $iconBase }}Briefcase.png" alt="" width="20" height="20">
         <span>LinkedIn</span>
       </a>
       {{ end }}
     </div>
 
     <div class="wm-cmdbar">
-      <span class="wm-cmdbar-left">{{ if not .IsHome }}<a href="/" class="wm-cmd-link">Home</a>{{ end }}</span>
+      <span class="wm-cmdbar-left">{{ if not .IsHome }}<a href="{{ $homeURL }}" class="wm-cmd-link">Home</a>{{ end }}</span>
       <span class="wm-cmdbar-right">
         {{- if .IsHome -}}
           {{- with index site.Menus.main 0 -}}
@@ -85,30 +87,30 @@
         {{ range site.Menus.main }}
         {{ if ne (default true .Params.desktopIcon) false }}
         <a href="{{ .URL }}" class="desktop-icon" data-open data-title="{{ .Params.windowTitle | default .Name }}">
-          <div class="icon-img"><img src="/icons/xp/{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="48" height="48"></div>
+          <div class="icon-img"><img src="{{ $iconBase }}{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="48" height="48"></div>
           <span class="icon-label">{{ .Params.desktopLabel | default .Name }}</span>
         </a>
         {{ end }}
         {{ end }}
 
         {{ with site.Params.resumeURL }}
-        <a href="{{ . | absURL }}" class="desktop-icon" target="_blank">
-          <div class="icon-img"><img src="/icons/xp/GenericDocument.png" alt="" width="48" height="48"></div>
+        <a href="{{ . | relURL }}" class="desktop-icon" target="_blank">
+          <div class="icon-img"><img src="{{ $iconBase }}GenericDocument.png" alt="" width="48" height="48"></div>
           <span class="icon-label">My Resume</span>
         </a>
         {{ end }}
       </div>
 
-      <a href="/" class="desktop-icon" id="reset-desktop-icon" style="position:absolute;top:8px;right:8px;z-index:2;display:none;">
-        <div class="icon-img"><img src="/icons/xp/CommandPrompt.png" alt="" width="48" height="48"></div>
+      <a href="{{ $homeURL }}" class="desktop-icon" id="reset-desktop-icon" style="position:absolute;top:8px;right:8px;z-index:2;display:none;">
+        <div class="icon-img"><img src="{{ $iconBase }}CommandPrompt.png" alt="" width="48" height="48"></div>
         <span class="icon-label">resetDesktop.exe</span>
       </a>
 
       {{- $scatteredPages := where site.RegularPages "Type" "in" $mainSections -}}
       {{ range $i, $page := $scatteredPages }}
       {{ if not $page.Params.draft }}
-      <a href="{{ $page.Permalink }}" class="desktop-icon desktop-file-scattered" data-open data-title="{{ $page.Title }}" data-seed="{{ $i }}">
-        <div class="icon-img"><img src="/icons/xp/Notepad.png" alt="" width="48" height="48"></div>
+      <a href="{{ $page.RelPermalink }}" class="desktop-icon desktop-file-scattered" data-open data-title="{{ $page.Title }}" data-seed="{{ $i }}">
+        <div class="icon-img"><img src="{{ $iconBase }}Notepad.png" alt="" width="48" height="48"></div>
         <span class="icon-label">{{ $page.Title | truncate 28 }}</span>
       </a>
       {{ end }}
@@ -120,7 +122,7 @@
     <!-- Taskbar -->
     <div class="xp-taskbar">
       <button class="start-button" id="start-btn">
-        <img class="start-flag" src="/icons/xp/WindowsFlag.svg" alt="" width="20" height="20">
+        <img class="start-flag" src="{{ $iconBase }}WindowsFlag.svg" alt="" width="20" height="20">
         <span class="start-text">start</span>
       </button>
 
@@ -133,7 +135,7 @@
           {{- with .homeWindowTitle -}}{{- $hwTitle = . -}}{{- end -}}
         {{- end -}}
         <a class="taskbar-item active" href="#" id="home-window-taskbar-item">
-          <img class="taskbar-item-icon" src="/icons/xp/{{ $hwIcon }}.png" alt="" width="16" height="16">
+          <img class="taskbar-item-icon" src="{{ $iconBase }}{{ $hwIcon }}.png" alt="" width="16" height="16">
           <span class="taskbar-item-text">{{ $hwTitle }}</span>
         </a>
         {{ else }}
@@ -143,16 +145,16 @@
             {{- with .Params.icon -}}{{- $tbIcon = . -}}{{- end -}}
           {{- end -}}
         {{- end -}}
-        <a class="taskbar-item active" href="{{ .Permalink }}">
-          <img class="taskbar-item-icon" src="/icons/xp/{{ $tbIcon }}.png" alt="" width="16" height="16">
+        <a class="taskbar-item active" href="{{ .RelPermalink }}">
+          <img class="taskbar-item-icon" src="{{ $iconBase }}{{ $tbIcon }}.png" alt="" width="16" height="16">
           <span class="taskbar-item-text">{{ .Title }}</span>
         </a>
         {{ end }}
       </div>
 
       <div class="system-tray">
-        <img class="tray-icon" src="/icons/xp/NetworkConnections.png" alt="Network" width="16" height="16" title="Local Area Connection">
-        <img class="tray-icon" src="/icons/xp/Volume.png" alt="Volume" width="16" height="16" title="Volume">
+        <img class="tray-icon" src="{{ $iconBase }}NetworkConnections.png" alt="Network" width="16" height="16" title="Local Area Connection">
+        <img class="tray-icon" src="{{ $iconBase }}Volume.png" alt="Volume" width="16" height="16" title="Volume">
         <span class="tray-clock" id="xp-clock"></span>
       </div>
     </div>
@@ -161,19 +163,19 @@
     <div class="start-menu" id="start-menu">
       <div class="start-menu-header">
         {{ with site.Params.avatar }}
-        <img class="start-menu-avatar" src="{{ . }}" alt="{{ site.Params.name }}">
+        <img class="start-menu-avatar" src="{{ . | relURL }}" alt="{{ site.Params.name }}">
         {{ end }}
         <span class="start-menu-username">{{ site.Params.name | default site.Title }}</span>
       </div>
       <div class="start-menu-body">
         <div class="start-menu-left">
-          <a href="/" class="start-menu-item">
-            <span class="start-menu-item-icon"><img src="/icons/xp/Desktop.png" alt="" width="24" height="24"></span> Desktop
+          <a href="{{ $homeURL }}" class="start-menu-item">
+            <span class="start-menu-item-icon"><img src="{{ $iconBase }}Desktop.png" alt="" width="24" height="24"></span> Desktop
           </a>
           <div class="start-menu-divider"></div>
           {{ range site.Menus.main }}
           <a href="{{ .URL }}" class="start-menu-item" data-open data-title="{{ .Params.windowTitle | default .Name }}">
-            <span class="start-menu-item-icon"><img src="/icons/xp/{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="24" height="24"></span>
+            <span class="start-menu-item-icon"><img src="{{ $iconBase }}{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="24" height="24"></span>
             {{ .Name }}
           </a>
           {{ end }}
@@ -181,14 +183,14 @@
         <div class="start-menu-right">
           {{ range site.Menus.main }}
           <a href="{{ .URL }}" class="start-menu-item" data-open data-title="{{ .Params.windowTitle | default .Name }}">
-            <span class="start-menu-item-icon"><img src="/icons/xp/{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="24" height="24"></span>
+            <span class="start-menu-item-icon"><img src="{{ $iconBase }}{{ .Params.icon | default "FolderClosed" }}.png" alt="" width="24" height="24"></span>
             {{ .Params.windowTitle | default .Name }}
           </a>
           {{ end }}
           {{ with site.Params.resumeURL }}
           <div class="start-menu-divider"></div>
-          <a href="{{ . | absURL }}" class="start-menu-item" target="_blank">
-            <span class="start-menu-item-icon"><img src="/icons/xp/GenericDocument.png" alt="" width="24" height="24"></span> My Resume
+          <a href="{{ . | relURL }}" class="start-menu-item" target="_blank">
+            <span class="start-menu-item-icon"><img src="{{ $iconBase }}GenericDocument.png" alt="" width="24" height="24"></span> My Resume
           </a>
           {{ end }}
         </div>
@@ -196,13 +198,13 @@
       <div class="start-menu-footer">
         {{ with site.Params.github }}
         <a class="start-menu-footer-btn" href="https://github.com/{{ . }}" target="_blank" rel="noopener">
-          <img src="/icons/xp/Logout.png" alt="" width="24" height="24">
+          <img src="{{ $iconBase }}Logout.png" alt="" width="24" height="24">
           GitHub
         </a>
         {{ end }}
         {{ with site.Params.linkedin }}
         <a class="start-menu-footer-btn" href="https://linkedin.com/in/{{ . }}" target="_blank" rel="noopener">
-          <img src="/icons/xp/InternetExplorer6.png" alt="" width="24" height="24">
+          <img src="{{ $iconBase }}InternetExplorer6.png" alt="" width="24" height="24">
           LinkedIn
         </a>
         {{ end }}
@@ -376,7 +378,7 @@
         /* Section → icon mapping (injected from Hugo config) */
         var sectionIcons = {};
         {{ range site.Menus.main -}}
-        {{ $url := .URL | strings.TrimRight "/" }}{{ with .Params.icon }}sectionIcons['{{ $url }}'] = '/icons/xp/{{ . }}.png';
+        {{ $url := .URL | strings.TrimRight "/" }}{{ with .Params.icon }}sectionIcons['{{ $url }}'] = '{{ $iconBase }}{{ . }}.png';
         {{ end }}{{ end }}
 
         function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
@@ -607,8 +609,8 @@
           win._wid = 'dyn-' + Date.now() + '-' + (++widCounter);
           win.style.cssText = 'width:'+w+'px;height:'+h+'px;left:'+l+'px;top:'+t+'px;max-width:none;max-height:none;';
 
-          var iconSrc = lookupSectionIcon(url) || '/icons/xp/Explorer.png';
-          if (isPdf) iconSrc = '/icons/xp/GenericDocument.png';
+          var iconSrc = lookupSectionIcon(url) || '{{ $iconBase }}Explorer.png';
+          if (isPdf) iconSrc = '{{ $iconBase }}GenericDocument.png';
 
           win.innerHTML =
             '<div class="window-titlebar">' +
@@ -671,7 +673,7 @@
 
           win.innerHTML =
             '<div class="window-titlebar">' +
-              '<div class="window-titlebar-icon"><img src="/icons/xp/WindowsPictureandFaxViewer.png" alt="" width="16" height="16"></div>' +
+              '<div class="window-titlebar-icon"><img src="{{ $iconBase }}WindowsPictureandFaxViewer.png" alt="" width="16" height="16"></div>' +
               '<span class="window-title">Windows Picture and Fax Viewer - ' + esc(fileName) + '</span>' +
               '<div class="window-controls">' +
                 '<button class="btn-minimize" title="Minimize">\u2212</button>' +
@@ -703,7 +705,7 @@
           var tbItem = document.createElement('a');
           tbItem.className = 'taskbar-item active';
           tbItem.href = '#';
-          tbItem.innerHTML = '<img class="taskbar-item-icon" src="/icons/xp/WindowsPictureandFaxViewer.png" alt="" width="16" height="16"><span class="taskbar-item-text">' + esc('Picture Viewer - ' + fileName) + '</span>';
+          tbItem.innerHTML = '<img class="taskbar-item-icon" src="{{ $iconBase }}WindowsPictureandFaxViewer.png" alt="" width="16" height="16"><span class="taskbar-item-text">' + esc('Picture Viewer - ' + fileName) + '</span>';
           taskbarContainer.appendChild(tbItem);
           win._taskbarItem = tbItem;
 
@@ -857,7 +859,7 @@
         (function() {
           if (!document.body.classList.contains('xp-desktop')) return;
           var path = normalizeUrl(location.pathname);
-          if (!path || path === '/') return;
+          if (!path || path === '{{ $homeURL }}') return;
           if (document.querySelector('.desktop-area .xp-window[data-url]')) return;
           var link = document.querySelector('[data-open][href="' + path + '"]');
           var title = link ? (link.getAttribute('data-title') || link.textContent.trim()) : path.replace(/\//g, ' ').trim();
@@ -926,7 +928,7 @@
           resetIcon.style.display = '';
           resetIcon.addEventListener('click', function(e) {
             e.preventDefault();
-            location.href = '/';
+            location.href = '{{ $homeURL }}';
           });
         }
 

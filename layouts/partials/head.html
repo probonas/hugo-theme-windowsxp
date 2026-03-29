@@ -17,14 +17,14 @@
     {{ $typo := resources.Get "css/typography.css" }}
     {{ $xp := resources.Get "css/xp.css" }}
     {{ $css := slice $typo $xp | resources.Concat "css/bundle.css" | minify }}
-    <link rel="preload stylesheet" as="style" href="{{ $css.Permalink }}" />
+    <link rel="preload stylesheet" as="style" href="{{ $css.RelPermalink }}" />
 
-    {{ with site.Params.xp }}{{ with .wallpaper }}
-    <style>:root { --xp-wallpaper: url('{{ . }}'); }</style>
-    {{ end }}{{ end }}
+    {{- $wallpaper := "bliss.jpg" | relURL -}}
+    {{- with site.Params.xp -}}{{- with .wallpaper -}}{{- $wallpaper = . -}}{{- end -}}{{- end -}}
+    <style>:root { --xp-wallpaper: url('{{ $wallpaper }}'); }</style>
 
-    <link rel="icon" href="{{ site.Params.favicon | default `favicon.ico` | absURL }}" />
-    <link rel="apple-touch-icon" href="{{ site.Params.appleTouchIcon | default `apple-touch-icon.png` | absURL }}" />
+    <link rel="icon" href="{{ site.Params.favicon | default `favicon.ico` | relURL }}" />
+    <link rel="apple-touch-icon" href="{{ site.Params.appleTouchIcon | default `apple-touch-icon.png` | relURL }}" />
 
     {{ hugo.Generator }}
 
